@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>Trail Weather Calendar</title>
+  https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css
+  <ttps://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js</script>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
+    h1 { text-align: center; }
+    #calendar { max-width: 1000px; margin: 0 auto; }
+    /* สีพื้นหลังตามสถานะ */
+    .fc-daygrid-event.status-good { background-color: #e9f7ef; border-color: #28a745; color: #155724; }
+    .fc-daygrid-event.status-rain { background-color: #fff3cd; border-color: #ffc107; color: #856404; }
+    .fc-daygrid-event.status-bad_air { background-color: #f8d7da; border-color: #dc3545; color: #721c24; }
+  </style>
+</head>
+<body>
+  <h1>Trail Weather Calendar</h1>
+  <div id="calendar"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      const API_URL = 'YOUR_API_GATEWAY_URL'; // TODO: ใส่ URL จาก API Gateway
+      const calendarEl = document.getElementById('calendar');
+
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'th',
+        height: 'auto',
+        events: async (fetchInfo, success, failure) => {
+          try {
+            const res = await fetch(API_URL);
+            const data = await res.json();
+
+            // เพิ่ม class ตามสถานะ เพื่อเปลี่ยนสี event
+            const styled = data.map(ev => ({
+              ...ev,
+              classNames: [`status-${ev?.extendedProps?.status || 'good'}`]
+            }));
+
+            success(styled);
+          } catch (err) {
+            console.error(err);
+            failure(err);
+          }
+        },
+        eventClick: function(info) {
+          const p = info.event.extendedProps;
+          const details = [
+            `เส้นทาง: ${p.trail}`,
+            `อุณหภูมิเฉลี่ยวันนั้น: ${p.temperatureAvg ?? '-'}°C`,
+            `ฝนตก: ${p.rain ? 'ใช่' : 'ไม่'}`,
+            `PM2.5 (ปัจจุบัน): ${p.pm25Current ?? '-'} µg/m³`,
+            `AQI US (ปัจจุบัน): ${p.aqiusCurrent ?? '-'}`
+          ].join('\n');
+
+          alert(details);
+        },
+        eventDidMount: function(info) {
+          // แสดงแค่ชื่อเขา + ไอคอนในช่องปฏิทินให้อ่านง่าย
+          const titleEl = info.el.querySelector('.fc-event-title');
+          if (titleEl) {
+            const title = info.event.title || '';
+            // ตัดให้สั้น: "เขาฉลาก ✅"
+            titleEl.textContent = title.replace(' เหมาะสำหรับวิ่ง', '').replace(' อาจลื่น', '');
+          }
+        }
+      });
+
+      calendar.render();
+    });
+  </script>
+</body>
+</html>
