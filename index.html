@@ -4,12 +4,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Trail Weather Calendar</title>
-  https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css
-  <ttps://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js</script>
+
+  <!-- ใช้ UMD build: ประกาศ window.FullCalendar -->
+  https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css
+
   <style>
     body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
     h1 { text-align: center; }
     #calendar { max-width: 1000px; margin: 0 auto; }
+
     /* สีพื้นหลังตามสถานะ */
     .fc-daygrid-event.status-good { background-color: #e9f7ef; border-color: #28a745; color: #155724; }
     .fc-daygrid-event.status-rain { background-color: #fff3cd; border-color: #ffc107; color: #856404; }
@@ -20,9 +23,13 @@
   <h1>Trail Weather Calendar</h1>
   <div id="calendar"></div>
 
+  <!-- FullCalendar JS (UMD/global) ต้องมาก่อนสคริปต์ของเรา -->
+  https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js</script>
+
+  <!-- สคริปต์ของคุณ -->
   <script>
     document.addEventListener('DOMContentLoaded', async function() {
-      const API_URL = 'https://y58dtxlf3c.execute-api.ap-southeast-2.amazonaws.com/default/helloLambda'; // TODO: ใส่ URL จาก API Gateway
+      const API_URL = 'https://y58dtxlf3c.execute-api.ap-southeast-2.amazonaws.com/default/helloLambda'; // URL จาก API Gateway
       const calendarEl = document.getElementById('calendar');
 
       const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -59,11 +66,10 @@
           alert(details);
         },
         eventDidMount: function(info) {
-          // แสดงแค่ชื่อเขา + ไอคอนในช่องปฏิทินให้อ่านง่าย
+          // ปรับข้อความในช่องปฏิทินให้อ่านง่าย
           const titleEl = info.el.querySelector('.fc-event-title');
           if (titleEl) {
             const title = info.event.title || '';
-            // ตัดให้สั้น: "เขาฉลาก ✅"
             titleEl.textContent = title.replace(' เหมาะสำหรับวิ่ง', '').replace(' อาจลื่น', '');
           }
         }
